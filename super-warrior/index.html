@@ -268,11 +268,11 @@
                     <h3 id="p1Name">战士1</h3>
                     <span class="type-icon type-fire" id="p1Type">火属性</span>
                     <div class="hp-bar"><div class="hp-fill" id="p1Hp" style="width:100%"></div></div>
-                    <p>HP: <span id="p1HpText">5030</span>/5030</p>
+                    <p>HP: <span id="p1HpText">8000</span>/8000</p>
                     <div class="xp-bar"><div class="xp-fill" id="p1Xp" style="width:0%"></div></div>
                     <div class="stats">
-                        <span class="stat-item">⚔️ <span id="p1Atk">790</span></span>
-                        <span class="stat-item">🛡️ <span id="p1Def">5030</span></span>
+                        <span class="stat-item">⚔️ <span id="p1Atk">600</span></span>
+                        <span class="stat-item">🛡️ <span id="p1Def">3500</span></span>
                     </div>
                     <p style="font-size: 0.8em; margin-top: 5px;">击杀: <span id="p1Kills">0</span>/<span id="p1Need">2</span></p>
                 </div>
@@ -285,11 +285,11 @@
                     <h3 id="p2Name">战士2</h3>
                     <span class="type-icon type-water" id="p2Type">水属性</span>
                     <div class="hp-bar"><div class="hp-fill" id="p2Hp" style="width:100%"></div></div>
-                    <p>HP: <span id="p2HpText">5030</span>/5030</p>
+                    <p>HP: <span id="p2HpText">8000</span>/8000</p>
                     <div class="xp-bar"><div class="xp-fill" id="p2Xp" style="width:0%"></div></div>
                     <div class="stats">
-                        <span class="stat-item">⚔️ <span id="p2Atk">790</span></span>
-                        <span class="stat-item">🛡️ <span id="p2Def">5030</span></span>
+                        <span class="stat-item">⚔️ <span id="p2Atk">600</span></span>
+                        <span class="stat-item">🛡️ <span id="p2Def">3500</span></span>
                     </div>
                     <p style="font-size: 0.8em; margin-top: 5px;">击杀: <span id="p2Kills">0</span>/<span id="p2Need">2</span></p>
                 </div>
@@ -358,15 +358,15 @@ let gameMode = 'ai';
 let currentTurn = 1;
 let battleCount = 0;
 
-// 玩家数据
+// 玩家数据（调整数值让战斗更持久）
 let player1 = {
     name: '玩家',
     type: '',
     level: 1,
-    hp: 5030,
-    maxHp: 5030,
-    atk: 790,
-    def: 5030,
+    hp: 8000,
+    maxHp: 8000,
+    atk: 600,
+    def: 3500,
     kills: 0,
     needKills: 2,
     avatar: ''
@@ -376,10 +376,10 @@ let player2 = {
     name: '对手',
     type: '',
     level: 1,
-    hp: 5030,
-    maxHp: 5030,
-    atk: 790,
-    def: 5030,
+    hp: 8000,
+    maxHp: 8000,
+    atk: 600,
+    def: 3500,
     kills: 0,
     needKills: 2,
     avatar: ''
@@ -398,10 +398,10 @@ function startGame(mode) {
         name: mode === 'pvp' ? '玩家1' : '玩家',
         type: getRandomType(),
         level: 1,
-        hp: 5030,
-        maxHp: 5030,
-        atk: 790,
-        def: 5030,
+        hp: 8000,
+        maxHp: 8000,
+        atk: 600,
+        def: 3500,
         kills: 0,
         needKills: 2,
         avatar: ''
@@ -411,10 +411,10 @@ function startGame(mode) {
         name: mode === 'pvp' ? '玩家2' : '电脑',
         type: getRandomType(),
         level: 1,
-        hp: 5030,
-        maxHp: 5030,
-        atk: 790,
-        def: 5030,
+        hp: 8000,
+        maxHp: 8000,
+        atk: 600,
+        def: 3500,
         kills: 0,
         needKills: 2,
         avatar: ''
@@ -492,8 +492,11 @@ function useSkill(skillType, isAI = false) {
     const attacker = currentTurn === 1 ? player1 : player2;
     const defender = currentTurn === 1 ? player2 : player1;
     
-    // 计算伤害
-    let damage = attacker.atk;
+    // 计算伤害（加入防御减伤 + 随机波动）
+    let baseDamage = attacker.atk;
+    let defenseReduction = defender.def * 0.15;  // 防御抵消15%伤害
+    let damage = Math.max(1, baseDamage - defenseReduction);
+    
     let multiplier = 1;
     let effectText = '';
     
@@ -509,9 +512,14 @@ function useSkill(skillType, isAI = false) {
     // 同属性加成
     if (skillType === attacker.type) {
         multiplier *= 1.2;
+        effectText += ' ⚡ 本系加成!';
     }
     
-    damage = Math.floor(damage * multiplier);
+    // 应用倍率 + 随机波动（±10%）
+    let randomFactor = 0.9 + Math.random() * 0.2;
+    damage = Math.floor(damage * multiplier * randomFactor);
+    damage = Math.max(1, damage);  // 保底1点伤害
+    
     defender.hp -= damage;
     
     // 动画效果
@@ -580,13 +588,13 @@ function handleWin(winner) {
         }
         
         // 属性提升
-        winnerPlayer.maxHp += 500;
+        winnerPlayer.maxHp += 800;
         winnerPlayer.hp = winnerPlayer.maxHp;
-        winnerPlayer.atk += 100;
-        winnerPlayer.def += 300;
+        winnerPlayer.atk += 60;
+        winnerPlayer.def += 350;
         
         logBattle(`🎉 ${winnerPlayer.name} 升到 ${winnerPlayer.level} 级！`, 'system');
-        logBattle(`📈 生命+500 攻击+100 防御+300`, 'system');
+        logBattle(`📈 生命+800 攻击+60 防御+350`, 'system');
         
         updatePlayerUI(winner);
     }
