@@ -485,8 +485,9 @@ function generateSkillButtons() {
     });
 }
 
-function useSkill(skillType) {
-    if (currentTurn === 2 && gameMode === 'ai') return;
+function useSkill(skillType, isAI = false) {
+    // 阻止玩家在AI回合操作，但允许AI自己执行
+    if (currentTurn === 2 && gameMode === 'ai' && !isAI) return;
     
     const attacker = currentTurn === 1 ? player1 : player2;
     const defender = currentTurn === 1 ? player2 : player1;
@@ -554,7 +555,7 @@ function aiTurn() {
         }
     }
     
-    useSkill(bestSkill);
+    useSkill(bestSkill, true);  // true表示这是AI操作
 }
 
 function handleWin(winner) {
